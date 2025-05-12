@@ -4,11 +4,9 @@ defmodule ForthEvaluator.Parser do
   @type word :: String.t()
 
   @type stack_op :: {:stack_op, atom(), [term()]}
-  @type evaluation_op :: {:evaluation_op, name :: String.t()}
-  @type definition_op ::
-          {:definition_op, name :: String.t(), tokens :: [stack_op | evaluation_op]}
+  @type dictionary_op :: {:dictionary_op, atom(), [term()]}
 
-  @type token :: stack_op | evaluation_op | definition_op
+  @type token :: stack_op | dictionary_op
 
   @spec parse_program(text_code :: String.t()) :: {:ok, [token]} | {:error, msg :: String.t()}
   @doc ~S"""
@@ -40,8 +38,8 @@ defmodule ForthEvaluator.Parser do
   # If successful, returns a tuple with the matching tokens and the remaining program
   # that was not able to parse (an empty list if none).
   @spec program_parser(words :: [word]) :: {:ok, {[token], [word]}} | {:error, String.t()}
-  def program_parser(words) do
-    [&stack_ops_parser/1, &definition_ops_parser/1, &evaluation_ops_parser/1]
+  defp program_parser(words) do
+    [&stack_op_parser/1, &dictionary_op_parser/1]
     |> Combinators.any()
     |> Combinators.until_complete()
     |> apply([words])
@@ -64,14 +62,14 @@ defmodule ForthEvaluator.Parser do
   end
 
   # Parser that parses a program given as a list of words.
-  # This parser matches all predefined operations and, if successful, returns 
-  # a tuple with the corresponding `stack_op` and the remaining 
+  # This parser matches all predefined stack operations and, if successful, 
+  # returns a tuple with the matching `stack_op` and the remaining 
   # program that was not able to parse (an empty list if none).
-  defp operation_parser(words)
+  defp predefined_stack_op_parser(words)
 
-  defp operation_parser([]), do: {:error, "expected operation but found nothing"}
+  defp predefined_stack_op_parser([]), do: {:error, "expected operation but found nothing"}
 
-  defp operation_parser([head | tail]) do
+  defp predefined_stack_op_parser([head | tail]) do
     case String.upcase(head) do
       "+" -> {:ok, {{:stack_op, :add, []}, tail}}
       "-" -> {:ok, {{:stack_op, :substract, []}, tail}}
@@ -87,30 +85,38 @@ defmodule ForthEvaluator.Parser do
   end
 
   # Parser that parses a program given as a list of words.
-  # This parser matches any operations (numbers and predefined operations)
-  # and, if successful, returns a tuple with the corresponding `stack_op` and the remaining 
+  # This parser matches any stack operation (numbers and predefined operations)
+  # and, if successful, returns a tuple with the matching `stack_op` and the remaining 
   # program that was not able to parse (an empty list if none).
-  def stack_ops_parser(words) do
-    [&operation_parser/1, &number_parser/1]
+  defp stack_op_parser(words) do
+    [&predefined_stack_op_parser/1, &number_parser/1]
     |> Combinators.any()
-    |> Combinators.repeat_once()
+    |> apply([words])
+  end
+
+  # Parser that parses a program given as a list of words.
+  # This parser matches any stack operation (numbers and predefined operations)
+  # and, if successful, returns a tuple with the matching `dictionary_op` and the remaining 
+  # program that was not able to parse (an empty list if none).
+  defp dictionary_op_parser(words) do
+    [&definition_parser/1, &evaluation_parser/1]
+    |> Combinators.any()
     |> apply([words])
   end
 
   # Parser that parses a program given as a list of words.
   # This parser matches new word definitions and, if successful, returns 
-  # a tuple with the corresponding `definition_op` and the remaining 
+  # a tuple with the matching `dictionary_op` and the remaining 
   # program that was not able to parse (an empty list if none).
-  defp definition_ops_parser(words) do
+  defp definition_parser(words) do
     colon_parser = Combinators.consume(&parse_match(":", &1))
     semicolon_parser = Combinators.consume(&parse_match(";", &1))
-    body_parser = Combinators.any([&stack_ops_parser/1, &evaluation_ops_parser/1])
 
-    case [colon_parser, &name_parser/1, body_parser, semicolon_parser]
+    case [colon_parser, &name_parser/1, &expresion_parser/1, semicolon_parser]
          |> Combinators.sequence()
          |> apply([words]) do
       {:ok, {[name, tokens], remainder}} ->
-        {:ok, {{:definition_op, name, tokens}, remainder}}
+        {:ok, {{:dictionary_op, :store, [name, tokens]}, remainder}}
 
       error ->
         error
@@ -118,13 +124,25 @@ defmodule ForthEvaluator.Parser do
   end
 
   # Parser that parses a program given as a list of words.
-  # This parser matches any valid word that could be evaluated, if successful, returns 
-  # a tuple with the corresponding `evaluation_op` and the remaining 
+  # This parser matches an expression composed by any sequence of stack operations
+  # or word evaluations (dictionary operation), if successful, returns 
+  # a tuple with the matching list of operations and the remaining 
   # program that was not able to parse (an empty list if none).
-  defp evaluation_ops_parser(words) do
+  defp expresion_parser(words) do
+    [&stack_op_parser/1, &evaluation_parser/1]
+    |> Combinators.any()
+    |> Combinators.repeat_once()
+    |> apply([words])
+  end
+
+  # Parser that parses a program given as a list of words.
+  # This parser matches any valid word that could be evaluated, if successful, returns 
+  # a tuple with the matching `dictionary_op` and the remaining 
+  # program that was not able to parse (an empty list if none).
+  defp evaluation_parser(words) do
     case words |> name_parser() do
-      {:ok, {name, remainder}} -> {:ok, {{:evaluation_op, name}, remainder}}
-      error -> error
+      {:ok, {name, remainder}} -> {:ok, {{:dictionary_op, :search, [name]}, remainder}}
+      _ -> :error
     end
   end
 

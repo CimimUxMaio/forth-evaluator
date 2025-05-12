@@ -31,8 +31,8 @@ defmodule ForthEvaluator.ParserTest do
     {:ok, result} = ForthEvaluator.Parser.parse_program("word1 word2")
 
     assert result == [
-             {:evaluation_op, "word1"},
-             {:evaluation_op, "word2"}
+             {:dictionary_op, :search, ["word1"]},
+             {:dictionary_op, :search, ["word2"]}
            ]
   end
 
@@ -40,14 +40,17 @@ defmodule ForthEvaluator.ParserTest do
     {:ok, result} = ForthEvaluator.Parser.parse_program(": example 1 DUP * ;")
 
     assert result == [
-             {:definition_op, "example",
-              [{:stack_op, :push, [1]}, {:stack_op, :duplicate, []}, {:stack_op, :multiply, []}]}
+             {:dictionary_op, :store,
+              [
+                "example",
+                [{:stack_op, :push, [1]}, {:stack_op, :duplicate, []}, {:stack_op, :multiply, []}]
+              ]}
            ]
 
     {:ok, result} = ForthEvaluator.Parser.parse_program(": name 300 ;")
 
     assert result == [
-             {:definition_op, "name", [{:stack_op, :push, [300]}]}
+             {:dictionary_op, :store, ["name", [{:stack_op, :push, [300]}]]}
            ]
   end
 
@@ -61,10 +64,10 @@ defmodule ForthEvaluator.ParserTest do
     {:ok, result} = ForthEvaluator.Parser.parse_program(": square DUP * ;\n3 square .")
 
     assert result == [
-             {:definition_op, "square",
-              [{:stack_op, :duplicate, []}, {:stack_op, :multiply, []}]},
+             {:dictionary_op, :store,
+              ["square", [{:stack_op, :duplicate, []}, {:stack_op, :multiply, []}]]},
              {:stack_op, :push, [3]},
-             {:evaluation_op, "square"},
+             {:dictionary_op, :search, ["square"]},
              {:stack_op, :pop, []}
            ]
   end

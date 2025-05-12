@@ -10,16 +10,8 @@ defmodule ForthEvaluator.Evaluator do
   """
   def evaluate(tokens, stack, dictionary) do
     tokens
+    |> execute_tokens(stack, dictionary)
     # Compile results
-    |> Enum.reduce_while([], fn token, results ->
-      result = evaluate_token(stack, dictionary, token)
-      results = results ++ [result]
-
-      case result do
-        {:error, _} -> {:halt, results}
-        _ -> {:cont, results}
-      end
-    end)
     |> List.flatten()
     # Convert results to strings
     |> Enum.map(&result_to_string/1)
@@ -29,24 +21,33 @@ defmodule ForthEvaluator.Evaluator do
     |> Enum.join(" ")
   end
 
+  defp execute_tokens(tokens, stack, dictionary) do
+    Enum.reduce_while(tokens, [], fn token, results ->
+      result = evaluate_token(stack, dictionary, token)
+      results = results ++ [result]
+
+      case result do
+        {:error, _} -> {:halt, results}
+        _ -> {:cont, results}
+      end
+    end)
+  end
+
   # Evaluates a single token executing the correspoing operation depending of
   # the token type:
   # - Stack operation (`:stack_op`)
-  # - Word definition (`:definition_op`)
-  # - Word evaluation (`:evaluation_op`)
+  # - Dictionary operation (`:dictionary_op`)
   defp evaluate_token(stack, dictionary, token) do
     case token do
       {:stack_op, operation, args} ->
         apply(Stack, operation, [stack | args])
 
-      {:definition_op, name, tokens} ->
-        Dictionary.store(dictionary, name, tokens)
-        {:ok, ""}
+      {:dictionary_op, operation, args} ->
+        result = apply(Dictionary, operation, [dictionary | args])
 
-      {:evaluation_op, name} ->
-        case Dictionary.search(dictionary, name) do
-          :unknown -> {:error, "Found unknown word #{name}."}
-          tokens -> evaluate(tokens, stack, dictionary)
+        case operation do
+          :store -> {:ok, ""}
+          :search -> execute_tokens(result, stack, dictionary)
         end
     end
   end
