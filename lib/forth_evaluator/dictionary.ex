@@ -27,6 +27,14 @@ defmodule ForthEvaluator.Dictionary do
     Agent.start_link(fn -> initial_state end)
   end
 
+  @spec stop(dictionary :: pid()) :: no_return()
+  @doc """
+  Stops the Dictionary process normally.
+  """
+  def stop(dictionary) do
+    Agent.stop(dictionary)
+  end
+
   @spec store(dict :: pid(), word :: Parser.word(), tokens :: [Parser.token()]) :: no_return()
   @doc """
   Stores the given tokens under the given name into the dictionary.

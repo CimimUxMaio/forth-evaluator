@@ -26,6 +26,14 @@ defmodule ForthEvaluator.Stack do
     Agent.start_link(fn -> initial_state end)
   end
 
+  @spec stop(stack :: pid()) :: no_return()
+  @doc """
+  Stops the Stack process normally.
+  """
+  def stop(stack) do
+    Agent.stop(stack)
+  end
+
   @spec pop(stack :: pid()) :: op_result
   @doc """
   Pops the top of the stack.
