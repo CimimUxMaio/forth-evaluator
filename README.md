@@ -25,7 +25,7 @@ Example code:
 12 12 / .      \ 1 ok
 13 2 mod .     \ 1 ok
 ```
-- You can check for example [here](https://learnxinyminutes.com/forth/).
+- You can check more examples [here](https://learnxinyminutes.com/forth/).
 
 ## About this Project
 The objective of this project is to implement an evaluator for a simple subset of Forth.
@@ -70,33 +70,34 @@ This introduces the `Stack` and `Dictionary` processes. The evaluator module req
 `Dictionary` pid for it to run the evaluation logic.
 
 The `Stack` is a process that handles the stack's state, and provides functions to operate its values
-`push`, `pop`, `sum` among others.
+`push`, `pop`, `sum` and many more.
 
 The `Dictionary` is a process that handles user defined words and the tokens each represents.
 It functions as a hash map, where its keys are words and its values are lists of lexical tokens.
 
 The evaluator uses this processes to execute each operation in the program.
 - Executing the stack operations needed.
-- Storing new defined words.
-- Interpreting existing words.
+- Storing new user defined words.
+- Interpreting user defined words.
 
 ### The Interface
-The user interface is a web page served by a server written using the Phoenix framework.
+The user interface is a web page served by a web server written using the Phoenix framework.
 
-This site displays a text area, where you can write your forth code, and a button that will trigger
-the code's evaluation. In a side pannel, you will be able to see the evaluation output.
+This site displays a text area, where you can write your forth code, and a button, that will trigger
+the code's evaluation. Evaluation results will be printed in a side pannel.
 
-Additionaly, the interface shows a list of previously evaluated programs. They can be loaded and
+Additionaly, the interface shows a list of previously evaluated programs, which can be loaded and
 re-run.
 
 #### The Backend
-When the user request the evaluation of a forth program, the correspoding endpoints starts two new child
+When the user requests the evaluation of a forth program, the correspoding endpoints starts two new child
 processes.
 1. First, the program is parsed into tokens using the `Parser` module.
 2. Then, a new `Stack` and `Dictionary` processes are started and passed into the **evaluator** function
 together with the parsed tokens.
-3. The `Evaluator` module will produce a string with the evaluated output of the program.
+3. The `Evaluator` module will produce a string with the output of the program.
 4. The *stack* and *dictionary* processes are stopped.
+5. The output is returned.
 
 ## Quick Start
 
