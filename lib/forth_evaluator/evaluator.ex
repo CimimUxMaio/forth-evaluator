@@ -3,12 +3,12 @@ defmodule ForthEvaluator.Evaluator do
   alias ForthEvaluator.Dictionary
   alias ForthEvaluator.Parser
 
-  @spec evaluate(stack :: pid(), dictionary :: pid(), tokens :: [Parser.token()]) :: no_return()
+  @spec evaluate(tokens :: [Parser.token()], stack :: pid(), dictionary :: pid()) :: no_return()
   @doc """
   Evaluates a list of tokens running each encapsulated operation sequentialy
   using the provided stack and dictionary processes.
   """
-  def evaluate(stack, dictionary, tokens) do
+  def evaluate(tokens, stack, dictionary) do
     tokens
     # Compile results
     |> Enum.reduce_while([], fn token, results ->
@@ -46,7 +46,7 @@ defmodule ForthEvaluator.Evaluator do
       {:evaluation_op, name} ->
         case Dictionary.search(dictionary, name) do
           :unknown -> {:error, "Found unknown word #{name}."}
-          tokens -> evaluate(stack, dictionary, tokens)
+          tokens -> evaluate(tokens, stack, dictionary)
         end
     end
   end
