@@ -9,6 +9,7 @@ defmodule ForthEvaluator.Application do
   def start(_type, _args) do
     children = [
       ForthEvaluatorWeb.Telemetry,
+      ForthEvaluator.Repo,
       {DNSCluster, query: Application.get_env(:forth_evaluator, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ForthEvaluator.PubSub},
       # Start the Finch HTTP client for sending emails

@@ -10,20 +10,10 @@ defmodule ForthEvaluatorWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
   scope "/", ForthEvaluatorWeb do
     pipe_through :browser
-
-    get "/", PageController, :home
+    live "/", Live.Editor
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", ForthEvaluatorWeb do
-  #   pipe_through :api
-  # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:forth_evaluator, :dev_routes) do
