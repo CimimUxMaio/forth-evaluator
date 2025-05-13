@@ -54,6 +54,23 @@ defmodule ForthEvaluator.ParserTest do
            ]
   end
 
+  test "Can parse definitions within definitions" do
+    result = ForthEvaluator.Parser.parse_program(": by4 : by2 DUP + ; by2 by2 ;")
+
+    assert result == [
+             {:dictionary_op, :store,
+              [
+                "by4",
+                [
+                  {:dictionary_op, :store,
+                   ["by2", [{:stack_op, :duplicate, []}, {:stack_op, :add, []}]]},
+                  {:dictionary_op, :search, ["by2"]},
+                  {:dictionary_op, :search, ["by2"]}
+                ]
+              ]}
+           ]
+  end
+
   test "Definitions can not be empty" do
     {status, msg} = ForthEvaluator.Parser.parse_program(": name ;")
     IO.puts(msg)

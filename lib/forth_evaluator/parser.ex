@@ -112,7 +112,7 @@ defmodule ForthEvaluator.Parser do
     colon_parser = Combinators.consume(&parse_match(":", &1))
     semicolon_parser = Combinators.consume(&parse_match(";", &1))
 
-    case [colon_parser, &name_parser/1, &expresion_parser/1, semicolon_parser]
+    case [colon_parser, &name_parser/1, &program_parser/1, semicolon_parser]
          |> Combinators.sequence()
          |> apply([words]) do
       {:ok, {[name, tokens], remainder}} ->
@@ -121,18 +121,6 @@ defmodule ForthEvaluator.Parser do
       error ->
         error
     end
-  end
-
-  # Parser that parses a program given as a list of words.
-  # This parser matches an expression composed by any sequence of stack operations
-  # or word evaluations (dictionary operation), if successful, returns 
-  # a tuple with the matching list of operations and the remaining 
-  # program that was not able to parse (an empty list if none).
-  defp expresion_parser(words) do
-    [&stack_op_parser/1, &evaluation_parser/1]
-    |> Combinators.any()
-    |> Combinators.repeat_once()
-    |> apply([words])
   end
 
   # Parser that parses a program given as a list of words.
