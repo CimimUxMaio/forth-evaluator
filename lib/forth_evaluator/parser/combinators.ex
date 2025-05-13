@@ -47,8 +47,10 @@ defmodule ForthEvaluator.Parser.Combinators do
   end
 
   @doc """
-  Returns a new parser that combines all the given parsers in sequence.
+  Returns a new parser that combines all the given parsers in sequence until all
+  parsers have been matched or as soon as the first parsing error is returned.
   Parsing a given input first with the first parser, then with the second, etc.
+  This parser also returns error if it doesn't find any matches.
   """
   @spec sequence([parser]) :: parser
   def sequence(parsers) do
