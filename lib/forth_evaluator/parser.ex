@@ -122,7 +122,7 @@ defmodule ForthEvaluator.Parser do
     colon_parser = Combinators.consume(&parse_match(":", &1))
     semicolon_parser = Combinators.consume(&parse_match(";", &1))
 
-    case [colon_parser, &name_parser/1, &expresion_parser/1, semicolon_parser]
+    case [colon_parser, &name_parser/1, &program_parser/1, semicolon_parser]
          |> Combinators.sequence()
          |> apply([words]) do
       {:ok, {[name, tokens], remainder}} ->
