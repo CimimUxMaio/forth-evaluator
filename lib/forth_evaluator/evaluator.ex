@@ -45,9 +45,13 @@ defmodule ForthEvaluator.Evaluator do
       {:dictionary_op, operation, args} ->
         result = apply(Dictionary, operation, [dictionary | args])
 
-        case operation do
-          :store -> {:ok, ""}
-          :search -> execute_tokens(result, stack, dictionary)
+        if result == :unknown do
+          {:error, "Unknown word '#{List.first(args)}'"}
+        else
+          case operation do
+            :store -> {:ok, ""}
+            :search -> execute_tokens(result, stack, dictionary)
+          end
         end
     end
   end

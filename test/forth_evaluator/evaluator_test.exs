@@ -27,6 +27,11 @@ defmodule ForthEvaluator.EvaluatorTest do
     assert run_program(": half 2 SWAP / ; 8 half . 7 half .", context) == "4.0 3.5"
   end
 
+  test "raises runtime errors for unknown words", context do
+    assert run_program("1 1 + . example_word 3 3 .", context) ==
+             "2 RuntimeError: Unknown word 'example_word'"
+  end
+
   test "program stops at runtime errors", context do
     assert run_program("1 2 3 . . . .", context) == "3 2 1 RuntimeError: The stack is empty."
     assert run_program("0 2 /", context) == "RuntimeError: Division by zero."
