@@ -3,10 +3,11 @@ defmodule ForthEvaluator.Evaluator do
   alias ForthEvaluator.Dictionary
   alias ForthEvaluator.Parser
 
-  @spec evaluate(tokens :: [Parser.token()], stack :: pid(), dictionary :: pid()) :: no_return()
+  @spec evaluate(tokens :: [Parser.token()], stack :: pid(), dictionary :: pid()) :: String.t()
   @doc """
   Evaluates a list of tokens running each encapsulated operation sequentialy
-  using the provided stack and dictionary processes.
+  using the provided stack and dictionary processes and returns the program's
+  output as a string.
   """
   def evaluate(tokens, stack, dictionary) do
     tokens
