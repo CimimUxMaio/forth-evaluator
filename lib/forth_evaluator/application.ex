@@ -17,7 +17,8 @@ defmodule ForthEvaluator.Application do
       # Start a worker by calling: ForthEvaluator.Worker.start_link(arg)
       # {ForthEvaluator.Worker, arg},
       # Start to serve requests, typically the last entry
-      ForthEvaluatorWeb.Endpoint
+      ForthEvaluatorWeb.Endpoint,
+      {Task.Supervisor, name: ForthEvaluator.EvalSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
