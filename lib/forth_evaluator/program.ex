@@ -1,6 +1,8 @@
 defmodule ForthEvaluator.Program do
   use Ecto.Schema
 
+  alias ForthEvaluator.{Parser, Evaluator}
+
   import Ecto.Changeset
 
   schema "programs" do
@@ -18,5 +20,18 @@ defmodule ForthEvaluator.Program do
     |> validate_required([:status, :text])
     |> validate_inclusion(:status, ["RUNNING", "DONE"])
     |> put_change(:last_update, DateTime.utc_now() |> DateTime.truncate(:second))
+  end
+
+  def run(program, stack, dictionary) do
+    output =
+      case Parser.parse_program(program.text) do
+        :error ->
+          "Syntax Error"
+
+        tokens ->
+          Evaluator.evaluate(tokens, stack, dictionary)
+      end
+
+    %ForthEvaluator.Program{program | output: output}
   end
 end
