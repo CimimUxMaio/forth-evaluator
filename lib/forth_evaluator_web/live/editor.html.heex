@@ -35,8 +35,10 @@
             phx-value-id={program.id}
           >
             <div class="w-1/4">{program.status}</div>
-            <div class="w-1/2">{program.text}</div>
-            <div class="w-1/4 text-right">{program.last_update}</div>
+            <div class="w-1/2 overflow-hidden">{program.text}</div>
+            <div class="w-1/4 text-right">
+              {NaiveDateTime.to_string(program.last_update) |> String.slice(0..18)}
+            </div>
           </div>
         <% end %>
       </div>
