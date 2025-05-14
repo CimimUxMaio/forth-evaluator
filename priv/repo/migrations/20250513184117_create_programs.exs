@@ -6,7 +6,6 @@ defmodule ForthEvaluator.Repo.Migrations.CreatePrograms do
       add(:status, :string)
       add(:text, :string)
       add(:output, :string)
-      add(:last_update, :utc_datetime)
 
       timestamps(type: :utc_datetime)
     end

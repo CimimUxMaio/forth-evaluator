@@ -53,7 +53,7 @@ defmodule ForthEvaluatorWeb.Live.Editor do
   end
 
   defp get_program_history() do
-    query = from(prog in Program, order_by: [desc: prog.last_update])
+    query = from(prog in Program, order_by: [desc: prog.updated_at])
     Repo.all(query)
   end
 
