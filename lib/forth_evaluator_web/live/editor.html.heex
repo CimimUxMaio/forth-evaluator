@@ -1,8 +1,5 @@
 <div class="flex w-full h-96 justify-center items-center">
-  <form
-    class="flex w-full h-full justify-center items-start gap-4"
-    phx-submit="submit-program"
-  >
+  <form class="flex w-full h-full justify-center items-start gap-4" phx-submit="submit-program">
     <textarea
       name="program-text"
       class="resize-none w-1/2 h-full font-semibold p-5"
@@ -33,7 +30,6 @@
       </div>
 
       <div class="overflow-scroll flex flex-col w-full h-full bg-[#57B0D7] gap-1">
-
         <%= for program <- @program_history do %>
           <div
             class="p-2 w-full h-fit flex items-center gap-2 text-white bg-[#176087] hover:bg-[#3780A7] hover:cursor-pointer"
@@ -45,9 +41,7 @@
             <div class="w-1/4 text-right">{program.last_update}</div>
           </div>
         <% end %>
-
       </div>
     </div>
   </form>
 </div>
-
