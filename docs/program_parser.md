@@ -53,6 +53,8 @@ a given input by attempting to parse it with its given parsers.
 
 The program parser is composed by many different simple parsers.
 
+![image](https://github.com/user-attachments/assets/fbf192e9-555c-4983-ae14-9e5d29cbb8eb)
+
 This heriarchy of smaller parsers are combined together into one single "Program Parser" by using
 parser combinator functions.
 
