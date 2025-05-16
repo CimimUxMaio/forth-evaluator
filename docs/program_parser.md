@@ -51,16 +51,40 @@ a given input by attempting to parse it with its given parsers.
 
 ## The Program Parser
 
-The program parser is composed by many different simple parsers.
+### Grammar
+
+This implementation supports a small subset of the Forth language. Its grammar could be described in
+BNF (Backus Naur Form) notation as follows:
+
+```ebnf
+<expr> ::= <operation> " " <expr>
+        |  <operation>
+
+<operation> ::= <stack_op> | <dictionary_op>
+
+<stack_op> ::= <number> | <predefined_op>
+
+<predefined_op> ::= "+" | "-" | "*" | "/" | "." | "DUP" | "DROP" | "SWAP" | "OVER"
+
+<dictionary_op> ::= <definition> | <evaluation>
+
+<definition> ::= ":" <name> <expr> ";"
+
+<evaluation> ::= <name>
+```
+
+### Implementation
+The program parser is composed by many different simple parsers which represent each structure
+of the language's grammar.
 
 ![image](https://github.com/user-attachments/assets/fbf192e9-555c-4983-ae14-9e5d29cbb8eb)
 
 This heriarchy of smaller parsers are combined together into one single "Program Parser" by using
 parser combinator functions.
 
-### Stack Operation Parser Example
+#### Stack Operation Parser Example
 
-#### Parser.number_parser
+##### Parser.number_parser
 
 The number parser is one of the simplest parsers. Given a list of words it matches with the first
 word if it represents a numeric value and converts it to a stack `:push` operation.
@@ -74,7 +98,7 @@ iex> Parser.number_parser(["DUP", "2", "3"])
 > {:error, "DUP is not a number"}
 ```
 
-#### Parser.predefined_stack_op_parser
+##### Parser.predefined_stack_op_parser
 This parser matches with the first word of the given list if it is one of the following _predefined_
 forth words or fails otherwise:
 - "+"
@@ -98,7 +122,7 @@ iex> Parser.predefined_stack_op_parser(["1", "2", "OVER"])
 > {:error, "'1' is not a predefined word"}
 ```
 
-#### Parser.stack_op_parser
+##### Parser.stack_op_parser
 Stack op parser is the result of combining the previous parsers
 (`number_parser` and `predefined_stack_op_parser`) into one using the `any` combinator.
 This parser, matches with any word that is either a number or a predefined operation,
@@ -116,7 +140,7 @@ iex> Parser.stack_op_parser(["user_defined_word", "1", "2"])
 > {:error, "'user_defined_word' is not a valid stack operation"}
 ```
 
-### Conclusion
+## Conclusion
 By using parser combinator functions we combined multiple simpler parsers into a single
 `Parser.program_parser` which is able to parse a whole forth program. This final parser,
 given a list of words, produces a list of operations ("tokens") which are later executed
