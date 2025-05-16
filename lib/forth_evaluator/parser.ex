@@ -10,17 +10,17 @@ defmodule ForthEvaluator.Parser do
 
   @type token :: stack_op | evaluation_op | definition_op
 
-  @spec parse_program(text_code :: String.t()) :: [token] | :error
+  @spec parse_program(text_code :: String.t()) :: {:ok, [token]} | {:error, msg :: String.t()}
   @doc ~S"""
   Parses a program given as plain text into a list of tokens. 
 
   ## Examples
 
       iex> ForthEvaluator.Parser.parse_program("1 2 .")
-      [{:stack_op, :push, [1]}, {:stack_op, :push, [2]}, {:stack_op, :pop, []}]
+      {:ok, [{:stack_op, :push, [1]}, {:stack_op, :push, [2]}, {:stack_op, :pop, []}]}
 
-      iex> ForthEvaluator.Parser.parse_program("@invalid program")
-      :error
+      iex> ForthEvaluator.Parser.parse_program("@_invalid_word program")
+      {:error, "invalid name '@_invalid_word'"}
 
   """
   def parse_program(text_code) do
@@ -30,20 +30,20 @@ defmodule ForthEvaluator.Parser do
       |> program_parser()
 
     case result do
-      {tokens, []} -> List.flatten(tokens)
+      {:ok, {tokens, []}} -> {:ok, List.flatten(tokens)}
       # Error or Non empty remainder
-      _ -> :error
+      error -> error
     end
   end
 
   # Parser that parses a program given as a list of words into tokens.
   # If successful, returns a tuple with the matching tokens and the remaining program
   # that was not able to parse (an empty list if none).
-  @spec program_parser(words :: [word]) :: {[token], [word]} | :error
-  defp program_parser(words) do
+  @spec program_parser(words :: [word]) :: {:ok, {[token], [word]}} | {:error, String.t()}
+  def program_parser(words) do
     [&stack_ops_parser/1, &definition_ops_parser/1, &evaluation_ops_parser/1]
     |> Combinators.any()
-    |> Combinators.repeat()
+    |> Combinators.until_complete()
     |> apply([words])
   end
 
@@ -51,15 +51,15 @@ defmodule ForthEvaluator.Parser do
   # This parser matches only numbers and, if successful, returns a tuple 
   # with a "push" `stack_op` for the matching number and the remaining 
   # program that was not able to parse (an empty list if none).
-  @spec number_parser(words :: [word]) :: {stack_op, [word]} | :error
+  @spec number_parser(words :: [word]) :: {:ok, {stack_op, [word]}} | {:error, String.t()}
   defp number_parser(words)
 
-  defp number_parser([]), do: :error
+  defp number_parser([]), do: {:error, "expected number but found nothing"}
 
   defp number_parser([head | tail]) do
     case Integer.parse(head) do
-      {number, ""} -> {{:stack_op, :push, [number]}, tail}
-      _ -> :error
+      {number, ""} -> {:ok, {{:stack_op, :push, [number]}, tail}}
+      _ -> {:error, "expected number but found '#{head}'"}
     end
   end
 
@@ -69,20 +69,20 @@ defmodule ForthEvaluator.Parser do
   # program that was not able to parse (an empty list if none).
   defp operation_parser(words)
 
-  defp operation_parser([]), do: :error
+  defp operation_parser([]), do: {:error, "expected operation but found nothing"}
 
   defp operation_parser([head | tail]) do
     case String.upcase(head) do
-      "+" -> {{:stack_op, :add, []}, tail}
-      "-" -> {{:stack_op, :substract, []}, tail}
-      "*" -> {{:stack_op, :multiply, []}, tail}
-      "/" -> {{:stack_op, :divide, []}, tail}
-      "DUP" -> {{:stack_op, :duplicate, []}, tail}
-      "DROP" -> {{:stack_op, :drop, []}, tail}
-      "SWAP" -> {{:stack_op, :swap, []}, tail}
-      "OVER" -> {{:stack_op, :over, []}, tail}
-      "." -> {{:stack_op, :pop, []}, tail}
-      _ -> :error
+      "+" -> {:ok, {{:stack_op, :add, []}, tail}}
+      "-" -> {:ok, {{:stack_op, :substract, []}, tail}}
+      "*" -> {:ok, {{:stack_op, :multiply, []}, tail}}
+      "/" -> {:ok, {{:stack_op, :divide, []}, tail}}
+      "DUP" -> {:ok, {{:stack_op, :duplicate, []}, tail}}
+      "DROP" -> {:ok, {{:stack_op, :drop, []}, tail}}
+      "SWAP" -> {:ok, {{:stack_op, :swap, []}, tail}}
+      "OVER" -> {:ok, {{:stack_op, :over, []}, tail}}
+      "." -> {:ok, {{:stack_op, :pop, []}, tail}}
+      _ -> {:error, "expected operation but found '#{head}'"}
     end
   end
 
@@ -90,7 +90,7 @@ defmodule ForthEvaluator.Parser do
   # This parser matches any operations (numbers and predefined operations)
   # and, if successful, returns a tuple with the corresponding `stack_op` and the remaining 
   # program that was not able to parse (an empty list if none).
-  defp stack_ops_parser(words) do
+  def stack_ops_parser(words) do
     [&operation_parser/1, &number_parser/1]
     |> Combinators.any()
     |> Combinators.repeat_once()
@@ -109,11 +109,11 @@ defmodule ForthEvaluator.Parser do
     case [colon_parser, &name_parser/1, body_parser, semicolon_parser]
          |> Combinators.sequence()
          |> apply([words]) do
-      {[name, tokens], remainder} ->
-        {{:definition_op, name, tokens}, remainder}
+      {:ok, {[name, tokens], remainder}} ->
+        {:ok, {{:definition_op, name, tokens}, remainder}}
 
-      _ ->
-        :error
+      error ->
+        error
     end
   end
 
@@ -123,8 +123,8 @@ defmodule ForthEvaluator.Parser do
   # program that was not able to parse (an empty list if none).
   defp evaluation_ops_parser(words) do
     case words |> name_parser() do
-      {name, remainder} -> {{:evaluation_op, name}, remainder}
-      _ -> :error
+      {:ok, {name, remainder}} -> {:ok, {{:evaluation_op, name}, remainder}}
+      error -> error
     end
   end
 
@@ -139,22 +139,22 @@ defmodule ForthEvaluator.Parser do
   # This parser matches any valid word, if successful, returns 
   # a tuple with the corresponding word as a string and the remaining 
   # program that was not able to parse (an empty list if none).
-  defp name_parser([]), do: :error
+  defp name_parser([]), do: {:error, "expected name but found nothing"}
 
   defp name_parser([head | tail]) do
-    if valid_name?(head), do: {head, tail}, else: :error
+    if valid_name?(head), do: {:ok, {head, tail}}, else: {:error, "invalid name '#{head}'"}
   end
 
   # This function parses a program given as a list of words.
   # It matches a given string (`text`) with the first word of the program.
   # If successful, returns a tuple with the corresponding word as a 
   # string and the remaining program that was not able to parse (an empty list if none).
-  defp parse_match(_text, []), do: :error
+  defp parse_match(text, []), do: {:error, "expected '#{text}' but found nothing"}
 
   defp parse_match(text, [head | tail]) do
     case head do
-      ^text -> {text, tail}
-      _ -> :error
+      ^text -> {:ok, {text, tail}}
+      _ -> {:error, "expected '#{text}' but found '#{head}'"}
     end
   end
 end

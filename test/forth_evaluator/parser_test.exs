@@ -3,7 +3,7 @@ defmodule ForthEvaluator.ParserTest do
   doctest ForthEvaluator.Parser
 
   test "Can parse stack operations" do
-    result = ForthEvaluator.Parser.parse_program("1 + - * / DUP DROP SWAP OVER .")
+    {:ok, result} = ForthEvaluator.Parser.parse_program("1 + - * / DUP DROP SWAP OVER .")
 
     assert result == [
              {:stack_op, :push, [1]},
@@ -18,7 +18,7 @@ defmodule ForthEvaluator.ParserTest do
              {:stack_op, :pop, []}
            ]
 
-    result = ForthEvaluator.Parser.parse_program("-1 0 1")
+    {:ok, result} = ForthEvaluator.Parser.parse_program("-1 0 1")
 
     assert result == [
              {:stack_op, :push, [-1]},
@@ -28,7 +28,7 @@ defmodule ForthEvaluator.ParserTest do
   end
 
   test "Can parse definitions references (evaluations)" do
-    result = ForthEvaluator.Parser.parse_program("word1 word2")
+    {:ok, result} = ForthEvaluator.Parser.parse_program("word1 word2")
 
     assert result == [
              {:evaluation_op, "word1"},
@@ -37,14 +37,14 @@ defmodule ForthEvaluator.ParserTest do
   end
 
   test "Can parse definitions" do
-    result = ForthEvaluator.Parser.parse_program(": example 1 DUP * ;")
+    {:ok, result} = ForthEvaluator.Parser.parse_program(": example 1 DUP * ;")
 
     assert result == [
              {:definition_op, "example",
               [{:stack_op, :push, [1]}, {:stack_op, :duplicate, []}, {:stack_op, :multiply, []}]}
            ]
 
-    result = ForthEvaluator.Parser.parse_program(": name 300 ;")
+    {:ok, result} = ForthEvaluator.Parser.parse_program(": name 300 ;")
 
     assert result == [
              {:definition_op, "name", [{:stack_op, :push, [300]}]}
@@ -52,11 +52,13 @@ defmodule ForthEvaluator.ParserTest do
   end
 
   test "Definitions can not be empty" do
-    assert :error == ForthEvaluator.Parser.parse_program(": name ;")
+    {status, msg} = ForthEvaluator.Parser.parse_program(": name ;")
+    IO.puts(msg)
+    assert status == :error
   end
 
   test "Can parse multiline programs" do
-    result = ForthEvaluator.Parser.parse_program(": square DUP * ;\n3 square .")
+    {:ok, result} = ForthEvaluator.Parser.parse_program(": square DUP * ;\n3 square .")
 
     assert result == [
              {:definition_op, "square",

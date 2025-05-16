@@ -4,18 +4,23 @@ defmodule ForthEvaluator.Parser.Combinators do
   or modify the given parsers.
   """
 
-  @type parser :: ([input :: term()] -> {term(), [term()]} | :error)
+  @type parser :: ([words :: String.t()] ->
+                     {:ok, {match :: term(), remainder :: [term()]}}
+                     | {:error, message :: String.t()})
 
   @spec any([parser]) :: parser
   @doc """
   Returns a new parser that matches when any of the given parsers
   match and fails when all fail.
   """
-  def any(parsers) do
+  def any(parsers) when parsers != [] do
     fn words ->
-      parsers
-      |> Enum.map(& &1.(words))
-      |> Enum.find(:error, &(&1 != :error))
+      Enum.find(parsers, List.last(parsers), fn parser ->
+        case parser.(words) do
+          {:ok, _} -> true
+          _ -> false
+        end
+      end).(words)
     end
   end
 
@@ -27,7 +32,12 @@ defmodule ForthEvaluator.Parser.Combinators do
   This parser can not fail, if the given parser matches 0 times the new parser will
   parse successfuly returning an empty list as match.
   """
-  def repeat(parser), do: &repeat_until_error(parser, &1)
+  def repeat(parser) do
+    fn words ->
+      {result, _} = repeat_until_error(parser, words)
+      result
+    end
+  end
 
   @spec repeat_once(parser) :: parser
   @doc """
@@ -39,9 +49,30 @@ defmodule ForthEvaluator.Parser.Combinators do
   """
   def repeat_once(parser) do
     fn words ->
-      case repeat(parser).(words) do
-        {[], _} -> :error
-        result -> result
+      {result, error_message} = repeat_until_error(parser, words)
+
+      case result do
+        {:ok, {[], _}} -> {:error, error_message}
+        _ -> result
+      end
+    end
+  end
+
+  @spec until_complete(parser) :: parser
+  @doc """
+  Returns a new parser that matches as many times as posible with a given parser.
+  This parser returns a tuple with the list of elements that it was able to match
+  and the remaining input.
+  This parser fails if it does not manage to parse the whole input. This means that,
+  if successful, its remainder will always be an empty list.
+  """
+  def until_complete(parser) do
+    fn words ->
+      {result, error_message} = repeat_until_error(parser, words)
+
+      case result do
+        {:ok, {_, remainder}} when remainder != [] -> {:error, error_message}
+        _ -> result
       end
     end
   end
@@ -55,35 +86,29 @@ defmodule ForthEvaluator.Parser.Combinators do
   @spec sequence([parser]) :: parser
   def sequence(parsers) do
     fn words ->
-      sequenced =
-        parsers
-        |> Enum.reduce_while({[], words}, fn parser, {matches, remainder} ->
-          case parser.(remainder) do
-            {[], remainder} ->
-              {:cont, {matches, remainder}}
+      parsers
+      |> Enum.reduce_while({:ok, {[], words}}, fn parser, {_, {matches, remainder}} ->
+        case parser.(remainder) do
+          {:ok, {[], remainder}} ->
+            {:cont, {:ok, {matches, remainder}}}
 
-            {match, remainder} ->
-              {:cont, {matches ++ [match], remainder}}
+          {:ok, {match, remainder}} ->
+            {:cont, {:ok, {matches ++ [match], remainder}}}
 
-            :error ->
-              {:halt, {matches, remainder}}
-          end
-        end)
-
-      case sequenced do
-        {[], _} -> :error
-        result -> result
-      end
+          {:error, message} ->
+            {:halt, {:error, message}}
+        end
+      end)
     end
   end
 
   defp repeat_until_error(parser, words, previous \\ []) do
     case parser.(words) do
-      :error ->
-        {previous, words}
-
-      {match, remainder} ->
+      {:ok, {match, remainder}} ->
         repeat_until_error(parser, remainder, previous ++ [match])
+
+      {:error, error_message} ->
+        {{:ok, {previous, words}}, error_message}
     end
   end
 
@@ -95,11 +120,9 @@ defmodule ForthEvaluator.Parser.Combinators do
   """
   def consume(parser) do
     fn words ->
-      result = parser.(words)
-
-      case result do
-        :error -> :error
-        {_, remainder} -> {[], remainder}
+      case parser.(words) do
+        {:ok, {_, remainder}} -> {:ok, {[], remainder}}
+        error -> error
       end
     end
   end
