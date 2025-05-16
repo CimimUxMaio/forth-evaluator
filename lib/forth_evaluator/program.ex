@@ -23,11 +23,11 @@ defmodule ForthEvaluator.Program do
   def run(program, stack, dictionary) do
     output =
       case Parser.parse_program(program.text) do
-        :error ->
-          "Syntax Error"
-
-        tokens ->
+        {:ok, tokens} ->
           Evaluator.evaluate(tokens, stack, dictionary)
+
+        {:error, error} ->
+          error
       end
 
     %ForthEvaluator.Program{program | output: output}
