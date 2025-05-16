@@ -58,25 +58,6 @@ defmodule ForthEvaluator.Parser.Combinators do
     end
   end
 
-  @spec until_complete(parser) :: parser
-  @doc """
-  Returns a new parser that matches as many times as posible with a given parser.
-  This parser returns a tuple with the list of elements that it was able to match
-  and the remaining input.
-  This parser fails if it does not manage to parse the whole input. This means that,
-  if successful, its remainder will always be an empty list.
-  """
-  def until_complete(parser) do
-    fn words ->
-      {result, error_message} = repeat_until_error(parser, words)
-
-      case result do
-        {:ok, {_, remainder}} when remainder != [] -> {:error, error_message}
-        _ -> result
-      end
-    end
-  end
-
   @doc """
   Returns a new parser that combines all the given parsers in sequence until all
   parsers have been matched or as soon as the first parsing error is returned.

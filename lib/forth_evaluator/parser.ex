@@ -41,7 +41,7 @@ defmodule ForthEvaluator.Parser do
   defp program_parser(words) do
     [&stack_op_parser/1, &dictionary_op_parser/1]
     |> Combinators.any()
-    |> Combinators.until_complete()
+    |> Combinators.repeat_once()
     |> apply([words])
   end
 
@@ -108,7 +108,7 @@ defmodule ForthEvaluator.Parser do
   # This parser matches new word definitions and, if successful, returns 
   # a tuple with the matching `dictionary_op` and the remaining 
   # program that was not able to parse (an empty list if none).
-  defp definition_parser(words) do
+  def definition_parser(words) do
     colon_parser = Combinators.consume(&parse_match(":", &1))
     semicolon_parser = Combinators.consume(&parse_match(";", &1))
 
@@ -130,7 +130,7 @@ defmodule ForthEvaluator.Parser do
   defp evaluation_parser(words) do
     case words |> name_parser() do
       {:ok, {name, remainder}} -> {:ok, {{:dictionary_op, :search, [name]}, remainder}}
-      _ -> :error
+      error -> error
     end
   end
 
