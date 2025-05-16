@@ -118,7 +118,7 @@ defmodule ForthEvaluator.Parser do
   # This parser matches new word definitions and, if successful, returns 
   # a tuple with the matching `dictionary_op` and the remaining 
   # program that was not able to parse (an empty list if none).
-  defp definition_parser(words) do
+  def definition_parser(words) do
     colon_parser = Combinators.consume(&parse_match(":", &1))
     semicolon_parser = Combinators.consume(&parse_match(";", &1))
 
