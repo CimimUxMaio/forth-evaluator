@@ -55,7 +55,7 @@ defmodule ForthEvaluator.ParserTest do
   end
 
   test "Can parse definitions within definitions" do
-    result = ForthEvaluator.Parser.parse_program(": by4 : by2 DUP + ; by2 by2 ;")
+    {:ok, result} = ForthEvaluator.Parser.parse_program(": by4 : by2 DUP + ; by2 by2 ;")
 
     assert result == [
              {:dictionary_op, :store,

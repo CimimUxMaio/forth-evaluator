@@ -10,9 +10,8 @@ defmodule ForthEvaluator.EvaluatorTest do
   end
 
   def run_program(program, context) do
-    program
-    |> Parser.parse_program()
-    |> Evaluator.evaluate(context[:stack], context[:dictionary])
+    {:ok, tokens} = Parser.parse_program(program)
+    Evaluator.evaluate(tokens, context[:stack], context[:dictionary])
   end
 
   test "valid program with predefined operations", context do
