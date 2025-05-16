@@ -68,7 +68,7 @@ BNF (Backus Naur Form) notation as follows:
 
 <dictionary_op> ::= <definition> | <evaluation>
 
-<definition> ::= ":" <name> <expr> ";"
+<definition> ::= ":" " " <name> " " <expr> " " ";"
 
 <evaluation> ::= <name>
 ```
