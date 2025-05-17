@@ -72,7 +72,7 @@ defmodule ForthEvaluator.ParserTest do
   end
 
   test "Definitions can not be empty" do
-    {status, msg} = ForthEvaluator.Parser.parse_program(": name ;")
+    {status, _} = ForthEvaluator.Parser.parse_program(": name ;")
     assert status == :error
   end
 
