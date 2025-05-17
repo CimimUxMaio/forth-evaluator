@@ -72,7 +72,7 @@ defmodule ForthEvaluator.ParserTest do
   end
 
   test "Definitions can not be empty" do
-    {status, msg} = ForthEvaluator.Parser.parse_program(": name ;")
+    {status, _} = ForthEvaluator.Parser.parse_program(": name ;")
     assert status == :error
   end
 
@@ -86,5 +86,10 @@ defmodule ForthEvaluator.ParserTest do
              {:dictionary_op, :search, ["square"]},
              {:stack_op, :pop, []}
            ]
+  end
+
+  test "Fails if it can not parse the whole program" do
+    {status, _} = ForthEvaluator.Parser.parse_program("1 2 + . 1 DUP * . @@@")
+    assert status == :error
   end
 end

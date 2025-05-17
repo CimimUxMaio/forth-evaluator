@@ -58,6 +58,17 @@ defmodule ForthEvaluator.Parser.Combinators do
     end
   end
 
+  def until_complete(parser) do
+    fn words ->
+      {result, error_message} = repeat_until_error(parser, words)
+
+      case result do
+        {:ok, {_, remainder}} when remainder != [] -> {:error, error_message}
+        _ -> result
+      end
+    end
+  end
+
   @doc """
   Returns a new parser that combines all the given parsers in sequence until all
   parsers have been matched or as soon as the first parsing error is returned.

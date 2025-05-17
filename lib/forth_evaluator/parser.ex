@@ -28,8 +28,7 @@ defmodule ForthEvaluator.Parser do
       |> program_parser()
 
     case result do
-      {:ok, {tokens, []}} -> {:ok, List.flatten(tokens)}
-      # Error or Non empty remainder
+      {:ok, {tokens, _}} -> {:ok, List.flatten(tokens)}
       error -> error
     end
   end
@@ -39,10 +38,11 @@ defmodule ForthEvaluator.Parser do
   # that was not able to parse (an empty list if none).
   @spec program_parser(words :: [word]) :: {:ok, {[token], [word]}} | {:error, String.t()}
   defp program_parser(words) do
-    [&stack_op_parser/1, &dictionary_op_parser/1]
-    |> Combinators.any()
-    |> Combinators.repeat_once()
-    |> apply([words])
+    Combinators.until_complete(&operation_parser/1) |> apply([words])
+  end
+
+  defp expresion_parser(words) do
+    Combinators.repeat_once(&operation_parser/1) |> apply([words])
   end
 
   # Parser that parses a program given as a list of words.
@@ -85,6 +85,16 @@ defmodule ForthEvaluator.Parser do
   end
 
   # Parser that parses a program given as a list of words.
+  # This parser matches any operation (either stack opertaion or dictionary operations)
+  # and, if successful, returns a tuple with the matching operation tuple and the remaining 
+  # program that was not able to parse (an empty list if none).
+  defp operation_parser(words) do
+    [&stack_op_parser/1, &dictionary_op_parser/1]
+    |> Combinators.any()
+    |> apply([words])
+  end
+
+  # Parser that parses a program given as a list of words.
   # This parser matches any stack operation (numbers and predefined operations)
   # and, if successful, returns a tuple with the matching `stack_op` and the remaining 
   # program that was not able to parse (an empty list if none).
@@ -112,7 +122,7 @@ defmodule ForthEvaluator.Parser do
     colon_parser = Combinators.consume(&parse_match(":", &1))
     semicolon_parser = Combinators.consume(&parse_match(";", &1))
 
-    case [colon_parser, &name_parser/1, &program_parser/1, semicolon_parser]
+    case [colon_parser, &name_parser/1, &expresion_parser/1, semicolon_parser]
          |> Combinators.sequence()
          |> apply([words]) do
       {:ok, {[name, tokens], remainder}} ->
