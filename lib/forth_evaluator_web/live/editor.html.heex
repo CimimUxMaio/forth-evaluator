@@ -1,0 +1,47 @@
+<div class="flex w-full h-96 justify-center items-center">
+  <form class="flex w-full h-full justify-center items-start gap-4" phx-submit="submit-program">
+    <textarea
+      name="program-text"
+      class="resize-none w-1/2 h-full font-semibold p-5"
+      placeholder="Write your code here..."
+      spellcheck="false"
+    >{@current_program.text}</textarea>
+
+    <div class="flex flex-col w-1/2 h-full gap-2">
+      <div class="flex justify-start items-center w-full gap-3">
+        <button
+          type="submit"
+          class="bg-[#176087] hover:bg-[#3780A7] text-white font-bold text-xl p-2 w-1/4"
+        >
+          Run
+        </button>
+        <div
+          phx-click="new-program"
+          class="flex justify-center hover:cursor-pointer bg-[#176087] hover:bg-[#3780A7] text-white font-bold text-xl p-2 w-1/4"
+        >
+          New program
+        </div>
+      </div>
+
+      <div class="overflow-scroll p-4 w-full h-1/3 bg-[#132E32] text-[#E7DFC6]">
+        {@current_program.output}
+      </div>
+
+      <div class="overflow-scroll flex flex-col w-full h-full bg-[#57B0D7] gap-1">
+        <%= for program <- @program_history do %>
+          <div
+            class="p-2 w-full h-fit flex items-center gap-2 text-white bg-[#176087] hover:bg-[#3780A7] hover:cursor-pointer"
+            phx-click="load-program"
+            phx-value-id={program.id}
+          >
+            <div class="w-1/4">{program.status}</div>
+            <div class="w-1/2 overflow-hidden">{program.text}</div>
+            <div class="w-1/4 text-right">
+              {NaiveDateTime.to_string(program.updated_at) |> String.slice(0..18)}
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </form>
+</div>
