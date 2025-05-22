@@ -59,6 +59,9 @@ The program consists of 3 main modules: the **Parser**, the **Evaluator**, and t
 The parser module is in charge of parsing a given program (provided as a string) into a list of
 predefined tokens which could later be evaluated by the *Evaluator* module.
 
+> [!INFO]
+> You may find more detailed documentation in [docs/program_parser.md](./docs/program_parser.md).
+
 ### The Evaluator
 
 The evaluator module is in charge of evaluating the list of tokens provided by the parser. There are 2
