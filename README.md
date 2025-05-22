@@ -101,7 +101,15 @@ together with the parsed tokens.
 
 ## Quick Start
 
-- To run a phoenix server with the application use:
+- Launch the database
+```
+make db
+```
+- Set up the database
+```
+make setup_db
+```
+- Run the application with
 ```
 make
 ```
@@ -109,6 +117,8 @@ or
 ```
 make run
 ```
+
+## Other Commands
 - To compile the project use:
 ```
 make build

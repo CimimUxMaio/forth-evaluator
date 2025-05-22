@@ -15,3 +15,9 @@ iex:
 
 clean:
 	mix clean
+
+db:
+	docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
+
+setup_db:
+	mix ecto.reset
