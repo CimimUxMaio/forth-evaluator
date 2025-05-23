@@ -38,21 +38,23 @@ defmodule ForthEvaluator.Evaluator do
   # the token type:
   # - Stack operation (`:stack_op`)
   # - Dictionary operation (`:dictionary_op`)
-  defp evaluate_token(stack, dictionary, token) do
-    case token do
-      {:stack_op, operation, args} ->
-        apply(Stack, operation, [stack | args])
+  defp evaluate_token(stack, dictionary, token)
 
-      {:dictionary_op, operation, args} ->
-        result = apply(Dictionary, operation, [dictionary | args])
+  defp evaluate_token(stack, _dictionary, {:stack_op, operation, args}) do
+    apply(Stack, operation, [stack | args])
+  end
 
-        if result == :unknown do
-          {:error, "Unknown word '#{List.first(args)}'"}
-        else
-          case operation do
-            :store -> {:ok, ""}
-            :search -> execute_tokens(result, stack, dictionary)
-          end
+  defp evaluate_token(stack, dictionary, {:dictionary_op, operation, args}) do
+    result = apply(Dictionary, operation, [dictionary | args])
+
+    case result do
+      :unknown ->
+        {:error, "Unknown word '#{List.first(args)}'"}
+
+      _ ->
+        case operation do
+          :store -> {:ok, ""}
+          :search -> execute_tokens(result, stack, dictionary)
         end
     end
   end
