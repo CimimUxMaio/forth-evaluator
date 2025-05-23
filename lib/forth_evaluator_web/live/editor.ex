@@ -16,7 +16,7 @@ defmodule ForthEvaluatorWeb.Live.Editor do
 
   def handle_event("submit-program", %{"program-text" => text}, socket) do
     program =
-      socket.assigns[:current_program]
+      socket.assigns.current_program
       |> Program.changeset(%{text: text, status: "RUNNING"})
       |> Repo.insert_or_update!()
 
@@ -40,7 +40,7 @@ defmodule ForthEvaluatorWeb.Live.Editor do
   end
 
   def handle_info({:evaluation_done, program}, socket) do
-    current_program? = program.id == socket.assigns[:current_program].id
+    current_program? = program.id == socket.assigns.current_program.id
 
     # If the program that finished evaluating is the current one,
     # update its changes in the view.
