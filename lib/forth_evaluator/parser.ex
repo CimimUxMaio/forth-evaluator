@@ -84,10 +84,10 @@ defmodule ForthEvaluator.Parser do
 
   def number_parser([]), do: {:error, "expected number but found nothing"}
 
-  def number_parser([head | tail]) do
-    case Integer.parse(head) do
-      {number, ""} -> {:ok, {{:stack_op, :push, [number]}, tail}}
-      _ -> {:error, "expected number but found '#{head}'"}
+  def number_parser([numeric | remainder]) do
+    case Integer.parse(numeric) do
+      {number, ""} -> {:ok, {{:stack_op, :push, [number]}, remainder}}
+      _ -> {:error, "expected number but found '#{numeric}'"}
     end
   end
 
@@ -97,18 +97,18 @@ defmodule ForthEvaluator.Parser do
 
   def predefined_stack_op_parser([]), do: {:error, "expected operation but found nothing"}
 
-  def predefined_stack_op_parser([head | tail]) do
-    case String.upcase(head) do
-      "+" -> {:ok, {{:stack_op, :add, []}, tail}}
-      "-" -> {:ok, {{:stack_op, :substract, []}, tail}}
-      "*" -> {:ok, {{:stack_op, :multiply, []}, tail}}
-      "/" -> {:ok, {{:stack_op, :divide, []}, tail}}
-      "DUP" -> {:ok, {{:stack_op, :duplicate, []}, tail}}
-      "DROP" -> {:ok, {{:stack_op, :drop, []}, tail}}
-      "SWAP" -> {:ok, {{:stack_op, :swap, []}, tail}}
-      "OVER" -> {:ok, {{:stack_op, :over, []}, tail}}
-      "." -> {:ok, {{:stack_op, :pop, []}, tail}}
-      _ -> {:error, "expected operation but found '#{head}'"}
+  def predefined_stack_op_parser([operation | remainder]) do
+    case String.upcase(operation) do
+      "+" -> {:ok, {{:stack_op, :add, []}, remainder}}
+      "-" -> {:ok, {{:stack_op, :substract, []}, remainder}}
+      "*" -> {:ok, {{:stack_op, :multiply, []}, remainder}}
+      "/" -> {:ok, {{:stack_op, :divide, []}, remainder}}
+      "DUP" -> {:ok, {{:stack_op, :duplicate, []}, remainder}}
+      "DROP" -> {:ok, {{:stack_op, :drop, []}, remainder}}
+      "SWAP" -> {:ok, {{:stack_op, :swap, []}, remainder}}
+      "OVER" -> {:ok, {{:stack_op, :over, []}, remainder}}
+      "." -> {:ok, {{:stack_op, :pop, []}, remainder}}
+      _ -> {:error, "expected operation but found '#{operation}'"}
     end
   end
 
@@ -180,8 +180,8 @@ defmodule ForthEvaluator.Parser do
   # Otherwise it returns an error tuple.
   def name_parser([]), do: {:error, "expected name but found nothing"}
 
-  def name_parser([head | tail]) do
-    if valid_name?(head), do: {:ok, {head, tail}}, else: {:error, "invalid name '#{head}'"}
+  def name_parser([name | remainder]) do
+    if valid_name?(name), do: {:ok, {name, remainder}}, else: {:error, "invalid name '#{name}'"}
   end
 
   # This function matches a given string (`text`) with the first word of a list of words.
@@ -189,10 +189,10 @@ defmodule ForthEvaluator.Parser do
   # Otherwise, it fails, returning a parser failure tuple.
   def parse_match(text, []), do: {:error, "expected '#{text}' but found nothing"}
 
-  def parse_match(text, [head | tail]) do
-    case head do
-      ^text -> {:ok, {text, tail}}
-      _ -> {:error, "expected '#{text}' but found '#{head}'"}
+  def parse_match(text, [word | remainder]) do
+    case word do
+      ^text -> {:ok, {text, remainder}}
+      _ -> {:error, "expected '#{text}' but found '#{word}'"}
     end
   end
 end
