@@ -1,0 +1,68 @@
+defmodule ForthEvaluator.Evaluator do
+  alias ForthEvaluator.Stack
+  alias ForthEvaluator.Dictionary
+  alias ForthEvaluator.Parser
+
+  @spec evaluate(tokens :: [Parser.token()], stack :: pid(), dictionary :: pid()) :: String.t()
+  @doc """
+  Evaluates a list of tokens running each encapsulated operation sequentialy
+  using the provided stack and dictionary processes and returns the program's
+  output as a string.
+  """
+  def evaluate(tokens, stack, dictionary) do
+    tokens
+    |> execute_tokens(stack, dictionary)
+    # Compile results
+    |> List.flatten()
+    # Convert results to strings
+    |> Enum.map(&result_to_string/1)
+    # Remove empty strings
+    |> Enum.filter(&(&1 != ""))
+    # Produce output string
+    |> Enum.join(" ")
+  end
+
+  defp execute_tokens(tokens, stack, dictionary) do
+    Enum.reduce_while(tokens, [], fn token, results ->
+      result = evaluate_token(stack, dictionary, token)
+      results = results ++ [result]
+
+      case result do
+        {:error, _} -> {:halt, results}
+        _ -> {:cont, results}
+      end
+    end)
+  end
+
+  # Evaluates a single token executing the correspoing operation depending of
+  # the token type:
+  # - Stack operation (`:stack_op`)
+  # - Dictionary operation (`:dictionary_op`)
+  defp evaluate_token(stack, dictionary, token)
+
+  defp evaluate_token(stack, _dictionary, {:stack_op, operation, args}) do
+    apply(Stack, operation, [stack | args])
+  end
+
+  defp evaluate_token(stack, dictionary, {:dictionary_op, operation, args}) do
+    result = apply(Dictionary, operation, [dictionary | args])
+
+    case result do
+      :unknown ->
+        {:error, "Unknown word '#{List.first(args)}'"}
+
+      _ ->
+        case operation do
+          :store -> {:ok, ""}
+          :search -> execute_tokens(result, stack, dictionary)
+        end
+    end
+  end
+
+  defp result_to_string(result) do
+    case result do
+      {:error, error_message} -> "RuntimeError: #{error_message}"
+      {:ok, return_value} -> to_string(return_value)
+    end
+  end
+end

@@ -1,17 +1,23 @@
-run:
+dev:
 	mix phx.server
 
-build:
-	mix compile
+deps:
+	mix local.hex --force
+	mix local.rebar --force
+	mix do deps.get, deps.compile
+	mix deps.get
 
-test:
-	mix test
+start_db:
+	docker compose up -d
 
-check-formatting:
-	mix format --check-formatted
+stop_db:
+	docker compose down
 
-iex:
-	iex -S mix
+setup_db:
+	mix ecto.drop
+	mix ecto.create
+	mix ecto.migrate
 
-clean:
-	mix clean
+setup_all: deps start_db
+	sleep 3
+	make setup_db
