@@ -103,36 +103,42 @@ together with the parsed tokens.
 5. The output is returned.
 
 ## Quick Start
+```
+make setup_all
+```
+- Downloads dependencies.
+- Compiles the project.
+- Starts the database.
+- Migrates the database.
 
-- Launch the database
-```
-make db
-```
-- Set up the database
-```
-make setup_db
-```
-- Run the application with
+Then run the application with:
 ```
 make
 ```
 or
 ```
-make run
+make dev
 ```
 
 ## Other Commands
-- To compile the project use:
+- To get and compile dependencies:
 ```
-make build
+make deps
 ```
-- To run tests use:
+
+- To start the database:
 ```
-make test
+make start_db
 ```
-- To clean the project use:
+
+- To stop the database:
 ```
-make clean
+make stop_db
+```
+
+- To setup the databse (drop, create, migrate)
+```
+make setup_db
 ```
 
 ## Dependencies

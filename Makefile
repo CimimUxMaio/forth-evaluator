@@ -1,23 +1,21 @@
-run:
+dev:
 	mix phx.server
 
-build:
-	mix compile
+deps:
+	mix local.hex --force
+	mix local.rebar --force
+	mix do deps.get, deps.compile
+	mix deps.get
 
-test:
-	mix test
+start_db:
+	docker compose up -d
 
-check-formatting:
-	mix format --check-formatted
-
-iex:
-	iex -S mix
-
-clean:
-	mix clean
-
-db:
-	docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
+stop_db:
+	docker compose down
 
 setup_db:
-	mix ecto.reset
+	mix ecto.drop
+	mix ecto.create
+	mix ecto.migrate
+
+setup_all: deps start_db setup_db
