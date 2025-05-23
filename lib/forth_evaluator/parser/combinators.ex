@@ -24,7 +24,7 @@ defmodule ForthEvaluator.Parser.Combinators do
     end
   end
 
-  @spec repeat(parser) :: parser
+  @spec zero_or_more_matches(parser) :: parser
   @doc """
   Returns a new parser that matches as many times as posible with a given parser.
   This parser returns a tuple with the list of elements that it was able to match
@@ -32,24 +32,24 @@ defmodule ForthEvaluator.Parser.Combinators do
   This parser can not fail, if the given parser matches 0 times the new parser will
   parse successfuly returning an empty list as match.
   """
-  def repeat(parser) do
+  def zero_or_more_matches(parser) do
     fn words ->
-      {result, _} = repeat_until_error(parser, words)
+      {result, _} = match_until_error(parser, words)
       result
     end
   end
 
-  @spec repeat_once(parser) :: parser
+  @spec one_or_more_matches(parser) :: parser
   @doc """
   Returns a new parser that matches as many times as posible with a given parser.
   This parser returns a tuple with the list of elements that it was able to match
   and the remaining input.
-  This parser differs from `repeat` in that it fails if the given parser does not
+  This parser differs from `zero_or_more_matches` in that it fails if the given parser does not
   match at least once with the given input.
   """
-  def repeat_once(parser) do
+  def one_or_more_matches(parser) do
     fn words ->
-      {result, error_message} = repeat_until_error(parser, words)
+      {result, error_message} = match_until_error(parser, words)
 
       case result do
         {:ok, {[], _}} -> {:error, error_message}
@@ -58,9 +58,9 @@ defmodule ForthEvaluator.Parser.Combinators do
     end
   end
 
-  def until_complete(parser) do
+  def match_until_complete(parser) do
     fn words ->
-      {result, error_message} = repeat_until_error(parser, words)
+      {result, error_message} = match_until_error(parser, words)
 
       case result do
         {:ok, {_, remainder}} when remainder != [] -> {:error, error_message}
@@ -94,23 +94,23 @@ defmodule ForthEvaluator.Parser.Combinators do
     end
   end
 
-  defp repeat_until_error(parser, words, previous \\ []) do
+  defp match_until_error(parser, words, previous \\ []) do
     case parser.(words) do
       {:ok, {match, remainder}} ->
-        repeat_until_error(parser, remainder, previous ++ [match])
+        match_until_error(parser, remainder, previous ++ [match])
 
       {:error, error_message} ->
         {{:ok, {previous, words}}, error_message}
     end
   end
 
-  @spec consume(parser) :: parser
+  @spec discard_match(parser) :: parser
   @doc """
   Returns a new parser that modifies a given parser by removing (consuming) its
   match. This means that if the input parser matches a given input the new parser will
   also be successful but will return an empty list as match.
   """
-  def consume(parser) do
+  def discard_match(parser) do
     fn words ->
       case parser.(words) do
         {:ok, {_, remainder}} -> {:ok, {[], remainder}}
