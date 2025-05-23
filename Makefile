@@ -18,4 +18,6 @@ setup_db:
 	mix ecto.create
 	mix ecto.migrate
 
-setup_all: deps start_db setup_db
+setup_all: deps start_db
+	sleep 3
+	make setup_db
