@@ -26,8 +26,8 @@ defmodule ForthEvaluator.Program do
         {:ok, tokens} ->
           Evaluator.evaluate(tokens, stack, dictionary)
 
-        {:error, error} ->
-          error
+        {:error, error_message} ->
+          "SyntaxError: #{error_message}"
       end
 
     %ForthEvaluator.Program{program | output: output}
