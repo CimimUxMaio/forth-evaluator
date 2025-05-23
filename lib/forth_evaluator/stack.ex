@@ -114,7 +114,7 @@ defmodule ForthEvaluator.Stack do
 
   """
   def add(stack) do
-    binary_operation(stack, &+/2)
+    binary_operation(stack, fn a, b -> a + b end)
   end
 
   @spec substract(stack :: pid()) :: op_result
@@ -142,7 +142,7 @@ defmodule ForthEvaluator.Stack do
 
   """
   def substract(stack) do
-    binary_operation(stack, &-/2)
+    binary_operation(stack, fn a, b -> a - b end)
   end
 
   @spec multiply(stack :: pid()) :: op_result
@@ -170,7 +170,7 @@ defmodule ForthEvaluator.Stack do
 
   """
   def multiply(stack) do
-    binary_operation(stack, &*/2)
+    binary_operation(stack, fn a, b -> a * b end)
   end
 
   @spec divide(stack :: pid()) :: op_result
@@ -209,7 +209,7 @@ defmodule ForthEvaluator.Stack do
     case Enum.at(elements, 1, :invalid_index) do
       :invalid_index -> failure_response(:double)
       0 -> {:error, "Division by zero."}
-      _ -> binary_operation(stack, &//2)
+      _ -> binary_operation(stack, fn a, b -> a / b end)
     end
   end
 
