@@ -1,11 +1,13 @@
 defmodule ForthEvaluator.Dictionary do
-  alias ForthEvaluator.Parser
-
   @moduledoc """
   A dictionary stores program defined words and the tokens that they
   represent during its execution.
   """
   use Agent
+
+  alias ForthEvaluator.{Parser, Evaluator}
+
+  @type op_result :: {:ok, return_value :: String.t()} | {:error, error_msg :: String.t()}
 
   @spec start_link(initial_state :: map()) :: Agent.on_start()
   @doc """
@@ -35,7 +37,7 @@ defmodule ForthEvaluator.Dictionary do
     Agent.stop(dictionary)
   end
 
-  @spec store(dict :: pid(), word :: Parser.word(), tokens :: [Parser.token()]) :: no_return()
+  @spec store(dict :: pid(), word :: Parser.word(), tokens :: [Parser.token()]) :: op_result
   @doc """
   Stores the given tokens under the given name into the dictionary.
 
@@ -56,29 +58,20 @@ defmodule ForthEvaluator.Dictionary do
   """
   def store(dictionary, word, tokens) do
     Agent.update(dictionary, fn state -> Map.put(state, word, tokens) end)
+    {:ok, ""}
   end
 
-  @spec search(dict :: pid(), word :: Parser.word()) :: [Parser.token()] | :unknown
+  @spec search(dict :: pid(), stack :: pid(), word :: Parser.word()) :: [op_result]
   @doc """
-  Retrieves the tokens stored under the given word.
-  If the word is not in the dictionary, returns the `:unknown` atom.
-
-    iex> {:ok, dictionary} = start_link()
-    iex> store(dictionary, "word", [1, 2])
-    iex> search(dictionary, "word")
-    [1, 2]
-
-    iex> {:ok, dictionary} = start_link(%{"word1" => [1]})
-    iex> store(dictionary, "word2", [2, 3])
-    iex> search(dictionary, "word2")
-    [2, 3]
-
-    iex> {:ok, dictionary} = start_link()
-    iex> search(dictionary, "unknown_word")
-    :unknown
-
+  Executes the tokens asociated with a given word and returns their results as a list.
+  If the word is not found, returns an error.
   """
-  def search(dictionary, word) do
-    Agent.get(dictionary, fn state -> Map.get(state, word, :unknown) end)
+  def search(dictionary, stack, word) do
+    Agent.get(dictionary, fn state ->
+      case Map.get(state, word, nil) do
+        nil -> [{:error, "Unknown word '#{word}'"}]
+        tokens -> Evaluator.execute_tokens(tokens, stack, dictionary)
+      end
+    end)
   end
 end

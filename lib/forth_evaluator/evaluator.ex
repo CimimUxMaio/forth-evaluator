@@ -12,8 +12,6 @@ defmodule ForthEvaluator.Evaluator do
   def evaluate(tokens, stack, dictionary) do
     tokens
     |> execute_tokens(stack, dictionary)
-    # Compile results
-    |> List.flatten()
     # Convert results to strings
     |> Enum.map(&result_to_string/1)
     # Remove empty strings
@@ -22,20 +20,20 @@ defmodule ForthEvaluator.Evaluator do
     |> Enum.join(" ")
   end
 
-  defp execute_tokens(tokens, stack, dictionary) do
+  def execute_tokens(tokens, stack, dictionary) do
     Enum.reduce_while(tokens, [], fn token, results ->
-      result = evaluate_token(stack, dictionary, token)
-      results = results ++ [result]
+      result = [evaluate_token(stack, dictionary, token)] |> List.flatten()
+      results = results ++ Enum.take_while(result, &result_is_ok?/1)
 
-      case result do
-        {:error, _} -> {:halt, results}
-        _ -> {:cont, results}
+      case Enum.find(result, &result_is_error?/1) do
+        nil -> {:cont, results}
+        error -> {:halt, results ++ [error]}
       end
     end)
   end
 
-  # Evaluates a single token executing the correspoing operation depending of
-  # the token type:
+  # Evaluates a single token executing the corresponding operation depending of
+  # its type:
   # - Stack operation (`:stack_op`)
   # - Dictionary operation (`:dictionary_op`)
   defp evaluate_token(stack, dictionary, token)
@@ -44,25 +42,19 @@ defmodule ForthEvaluator.Evaluator do
     apply(Stack, operation, [stack | args])
   end
 
-  defp evaluate_token(stack, dictionary, {:dictionary_op, operation, args}) do
-    result = apply(Dictionary, operation, [dictionary | args])
-
-    case result do
-      :unknown ->
-        {:error, "Unknown word '#{List.first(args)}'"}
-
-      _ ->
-        case operation do
-          :store -> {:ok, ""}
-          :search -> execute_tokens(result, stack, dictionary)
-        end
-    end
+  defp evaluate_token(_stack, dictionary, {:dictionary_op, :store, args}) do
+    apply(Dictionary, :store, [dictionary | args])
   end
 
-  defp result_to_string(result) do
-    case result do
-      {:error, error_message} -> "RuntimeError: #{error_message}"
-      {:ok, return_value} -> to_string(return_value)
-    end
+  defp evaluate_token(stack, dictionary, {:dictionary_op, :search, args}) do
+    apply(Dictionary, :search, [dictionary, stack | args])
   end
+
+  defp result_is_error?({:error, _}), do: true
+  defp result_is_error?(_), do: false
+
+  defp result_is_ok?(result), do: not result_is_error?(result)
+
+  defp result_to_string({:error, message}), do: "RuntimeError: #{message}"
+  defp result_to_string({:ok, return_value}), do: return_value
 end
