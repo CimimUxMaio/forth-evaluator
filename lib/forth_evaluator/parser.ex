@@ -23,10 +23,10 @@ defmodule ForthEvaluator.Parser do
   For example, the number parser parses the first word of the list into a stack 
   push operation:
 
-    iex> ForthEvaluator.Parser.number_parser(["1", "2", "3"])
+    iex> number_parser(["1", "2", "3"])
     {:ok, {{:stack_op, :push, [1]}, ["2", "3"]}} # => Remainder: ["2", "3"]
 
-    iex> ForthEvaluator.Parser.number_parser(["hello", "world"])
+    iex> number_parser(["hello", "world"])
     {:error, "expected number but found 'hello'"}
 
   """
@@ -46,10 +46,10 @@ defmodule ForthEvaluator.Parser do
 
   ## Examples
 
-      iex> ForthEvaluator.Parser.parse_program("1 2 .")
+      iex> parse_program("1 2 .")
       {:ok, [{:stack_op, :push, [1]}, {:stack_op, :push, [2]}, {:stack_op, :pop, []}]}
 
-      iex> ForthEvaluator.Parser.parse_program("@_invalid_word program")
+      iex> parse_program("@_invalid_word program")
       {:error, "invalid name '@_invalid_word'"}
 
   """

@@ -14,11 +14,11 @@ defmodule ForthEvaluator.Dictionary do
 
   ## Example
 
-    iex> {:ok, dictionary} = ForthEvaluator.Dictionary.start_link()
+    iex> {:ok, dictionary} = start_link()
     iex> Agent.get(dictionary, &Function.identity/1)
     %{}
 
-    iex> {:ok, dictionary} = ForthEvaluator.Dictionary.start_link(%{"word" => []})
+    iex> {:ok, dictionary} = start_link(%{"word" => []})
     iex> Agent.get(dictionary, &Function.identity/1)
     %{"word" => []}
 
@@ -39,17 +39,17 @@ defmodule ForthEvaluator.Dictionary do
   @doc """
   Stores the given tokens under the given name into the dictionary.
 
-    iex> {:ok, dictionary} = ForthEvaluator.Dictionary.start_link()
+    iex> {:ok, dictionary} = start_link()
     iex> Agent.get(dictionary, &Function.identity/1)
     %{}
-    iex> ForthEvaluator.Dictionary.store(dictionary, "word", [1, 2])
+    iex> store(dictionary, "word", [1, 2])
     iex> Agent.get(dictionary, &Function.identity/1)
     %{"word" => [1, 2]}
 
-    iex> {:ok, dictionary} = ForthEvaluator.Dictionary.start_link(%{"word1" => [1]})
+    iex> {:ok, dictionary} = start_link(%{"word1" => [1]})
     iex> Agent.get(dictionary, &Function.identity/1)
     %{"word1" => [1]}
-    iex> ForthEvaluator.Dictionary.store(dictionary, "word2", [2, 3])
+    iex> store(dictionary, "word2", [2, 3])
     iex> Agent.get(dictionary, &Function.identity/1)
     %{"word1" => [1], "word2" => [2, 3]}
 
@@ -63,18 +63,18 @@ defmodule ForthEvaluator.Dictionary do
   Retrieves the tokens stored under the given word.
   If the word is not in the dictionary, returns the `:unknown` atom.
 
-    iex> {:ok, dictionary} = ForthEvaluator.Dictionary.start_link()
-    iex> ForthEvaluator.Dictionary.store(dictionary, "word", [1, 2])
-    iex> ForthEvaluator.Dictionary.search(dictionary, "word")
+    iex> {:ok, dictionary} = start_link()
+    iex> store(dictionary, "word", [1, 2])
+    iex> search(dictionary, "word")
     [1, 2]
 
-    iex> {:ok, dictionary} = ForthEvaluator.Dictionary.start_link(%{"word1" => [1]})
-    iex> ForthEvaluator.Dictionary.store(dictionary, "word2", [2, 3])
-    iex> ForthEvaluator.Dictionary.search(dictionary, "word2")
+    iex> {:ok, dictionary} = start_link(%{"word1" => [1]})
+    iex> store(dictionary, "word2", [2, 3])
+    iex> search(dictionary, "word2")
     [2, 3]
 
-    iex> {:ok, dictionary} = ForthEvaluator.Dictionary.start_link()
-    iex> ForthEvaluator.Dictionary.search(dictionary, "unknown_word")
+    iex> {:ok, dictionary} = start_link()
+    iex> search(dictionary, "unknown_word")
     :unknown
 
   """

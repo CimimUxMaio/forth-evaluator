@@ -13,11 +13,11 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-    iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
+    iex> {:ok, stack} = start_link()
     iex> Agent.get(stack, &Function.identity/1)
     []
 
-    iex> {:ok, stack} = ForthEvaluator.Stack.start_link([1, 2, 3])
+    iex> {:ok, stack} = start_link([1, 2, 3])
     iex> Agent.get(stack, &Function.identity/1)
     [1, 2, 3]
 
@@ -42,16 +42,16 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([1, 2])
-      iex> ForthEvaluator.Stack.pop(stack)
+      iex> {:ok, stack} = start_link([1, 2])
+      iex> pop(stack)
       {:ok, "1"}
-      iex> ForthEvaluator.Stack.pop(stack)
+      iex> pop(stack)
       {:ok, "2"}
-      iex> ForthEvaluator.Stack.pop(stack)
+      iex> pop(stack)
       {:error, "The stack is empty."}
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.pop(stack)
+      iex> {:ok, stack} = start_link()
+      iex> pop(stack)
       {:error, "The stack is empty."}
 
   """
@@ -71,14 +71,14 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
+      iex> {:ok, stack} = start_link()
       iex> Agent.get(stack, &Function.identity/1)
       [] 
-      iex> ForthEvaluator.Stack.push(stack, 10)
+      iex> push(stack, 10)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       [10] 
-      iex> ForthEvaluator.Stack.push(stack, 20)
+      iex> push(stack, 20)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       [20, 10] 
@@ -98,18 +98,18 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([2, 2])
-      iex> ForthEvaluator.Stack.add(stack)
+      iex> {:ok, stack} = start_link([2, 2])
+      iex> add(stack)
       {:ok, ""} 
       iex> Agent.get(stack, &Function.identity/1)
       [4]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([1])
-      iex> ForthEvaluator.Stack.add(stack)
+      iex> {:ok, stack} = start_link([1])
+      iex> add(stack)
       {:error, "There are not enough elements in the stack."} 
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.add(stack)
+      iex> {:ok, stack} = start_link()
+      iex> add(stack)
       {:error, "There are not enough elements in the stack."} 
 
   """
@@ -126,18 +126,18 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3, 6])
-      iex> ForthEvaluator.Stack.substract(stack)
+      iex> {:ok, stack} = start_link([3, 6])
+      iex> substract(stack)
       {:ok, ""} 
       iex> Agent.get(stack, &Function.identity/1)
       [-3]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([100])
-      iex> ForthEvaluator.Stack.substract(stack)
+      iex> {:ok, stack} = start_link([100])
+      iex> substract(stack)
       {:error, "There are not enough elements in the stack."} 
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.substract(stack)
+      iex> {:ok, stack} = start_link()
+      iex> substract(stack)
       {:error, "There are not enough elements in the stack."} 
 
   """
@@ -154,18 +154,18 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([2, 3, 4])
-      iex> ForthEvaluator.Stack.multiply(stack)
+      iex> {:ok, stack} = start_link([2, 3, 4])
+      iex> multiply(stack)
       {:ok, ""} 
       iex> Agent.get(stack, &Function.identity/1)
       [6, 4]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([50])
-      iex> ForthEvaluator.Stack.multiply(stack)
+      iex> {:ok, stack} = start_link([50])
+      iex> multiply(stack)
       {:error, "There are not enough elements in the stack."} 
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.multiply(stack)
+      iex> {:ok, stack} = start_link()
+      iex> multiply(stack)
       {:error, "There are not enough elements in the stack."} 
 
   """
@@ -183,22 +183,22 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([40, 2, 1, 2, 3])
-      iex> ForthEvaluator.Stack.divide(stack)
+      iex> {:ok, stack} = start_link([40, 2, 1, 2, 3])
+      iex> divide(stack)
       {:ok, ""} 
       iex> Agent.get(stack, &Function.identity/1)
       [20.0, 1, 2, 3]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3, 0])
-      iex> ForthEvaluator.Stack.divide(stack)
+      iex> {:ok, stack} = start_link([3, 0])
+      iex> divide(stack)
       {:error, "Division by zero."}
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3])
-      iex> ForthEvaluator.Stack.divide(stack)
+      iex> {:ok, stack} = start_link([3])
+      iex> divide(stack)
       {:error, "There are not enough elements in the stack."} 
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.divide(stack)
+      iex> {:ok, stack} = start_link()
+      iex> divide(stack)
       {:error, "There are not enough elements in the stack."} 
 
   """
@@ -221,20 +221,20 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([99, 1, 2])
-      iex> ForthEvaluator.Stack.duplicate(stack)
+      iex> {:ok, stack} = start_link([99, 1, 2])
+      iex> duplicate(stack)
       {:ok, ""} 
       iex> Agent.get(stack, &Function.identity/1)
       [99, 99, 1, 2]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3])
-      iex> ForthEvaluator.Stack.duplicate(stack)
+      iex> {:ok, stack} = start_link([3])
+      iex> duplicate(stack)
       {:ok, ""} 
       iex> Agent.get(stack, &Function.identity/1)
       [3, 3]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.duplicate(stack)
+      iex> {:ok, stack} = start_link()
+      iex> duplicate(stack)
       {:error, "The stack is empty."} 
 
   """
@@ -257,24 +257,24 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([1, 2])
-      iex> ForthEvaluator.Stack.drop(stack)
+      iex> {:ok, stack} = start_link([1, 2])
+      iex> drop(stack)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       [2]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([4, 5, 6])
-      iex> ForthEvaluator.Stack.drop(stack)
+      iex> {:ok, stack} = start_link([4, 5, 6])
+      iex> drop(stack)
       {:ok, ""}
-      iex> ForthEvaluator.Stack.drop(stack)
+      iex> drop(stack)
       {:ok, ""}
-      iex> ForthEvaluator.Stack.drop(stack)
+      iex> drop(stack)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       []
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.pop(stack)
+      iex> {:ok, stack} = start_link()
+      iex> pop(stack)
       {:error, "The stack is empty."}
 
   """
@@ -293,24 +293,24 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([1, 2])
-      iex> ForthEvaluator.Stack.swap(stack)
+      iex> {:ok, stack} = start_link([1, 2])
+      iex> swap(stack)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       [2, 1]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3, 4, 5, 6])
-      iex> ForthEvaluator.Stack.swap(stack)
+      iex> {:ok, stack} = start_link([3, 4, 5, 6])
+      iex> swap(stack)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       [4, 3, 5, 6]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3])
-      iex> ForthEvaluator.Stack.swap(stack)
+      iex> {:ok, stack} = start_link([3])
+      iex> swap(stack)
       {:error, "There are not enough elements in the stack."}
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.swap(stack)
+      iex> {:ok, stack} = start_link()
+      iex> swap(stack)
       {:error, "There are not enough elements in the stack."}
 
   """
@@ -332,24 +332,24 @@ defmodule ForthEvaluator.Stack do
 
   ## Example
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([1, 2])
-      iex> ForthEvaluator.Stack.over(stack)
+      iex> {:ok, stack} = start_link([1, 2])
+      iex> over(stack)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       [2, 1, 2]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3, 4, 5, 6])
-      iex> ForthEvaluator.Stack.over(stack)
+      iex> {:ok, stack} = start_link([3, 4, 5, 6])
+      iex> over(stack)
       {:ok, ""}
       iex> Agent.get(stack, &Function.identity/1)
       [4, 3, 4, 5, 6]
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link([3])
-      iex> ForthEvaluator.Stack.over(stack)
+      iex> {:ok, stack} = start_link([3])
+      iex> over(stack)
       {:error, "There are not enough elements in the stack."}
 
-      iex> {:ok, stack} = ForthEvaluator.Stack.start_link()
-      iex> ForthEvaluator.Stack.over(stack)
+      iex> {:ok, stack} = start_link()
+      iex> over(stack)
       {:error, "There are not enough elements in the stack."}
 
   """

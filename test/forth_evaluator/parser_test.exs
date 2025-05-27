@@ -1,6 +1,6 @@
 defmodule ForthEvaluator.ParserTest do
   use ExUnit.Case, async: true
-  doctest ForthEvaluator.Parser
+  doctest ForthEvaluator.Parser, import: true
 
   test "Can parse stack operations" do
     {:ok, result} = ForthEvaluator.Parser.parse_program("1 + - * / DUP DROP SWAP OVER .")
