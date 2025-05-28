@@ -20,4 +20,4 @@ setup_db:
 
 setup_all: deps start_db
 	sleep 3
-	make setup_db
+	$(MAKE) setup_db
