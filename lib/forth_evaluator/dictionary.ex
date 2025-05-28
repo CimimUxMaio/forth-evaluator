@@ -68,7 +68,7 @@ defmodule ForthEvaluator.Dictionary do
   """
   def search(dictionary, stack, word) do
     Agent.get(dictionary, fn state ->
-      case Map.get(state, word, nil) do
+      case Map.get(state, word) do
         nil -> [{:error, "Unknown word '#{word}'"}]
         tokens -> Evaluator.execute_tokens(tokens, stack, dictionary)
       end
