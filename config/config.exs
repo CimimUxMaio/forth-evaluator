@@ -8,6 +8,7 @@
 import Config
 
 config :forth_evaluator,
+  ecto_repos: [ForthEvaluator.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
