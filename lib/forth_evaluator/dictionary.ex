@@ -67,11 +67,11 @@ defmodule ForthEvaluator.Dictionary do
   If the word is not found, returns an error.
   """
   def search(dictionary, stack, word) do
-    Agent.get(dictionary, fn state ->
-      case Map.get(state, word) do
-        nil -> [{:error, "Unknown word '#{word}'"}]
-        tokens -> Evaluator.execute_tokens(tokens, stack, dictionary)
-      end
-    end)
+    words = Agent.get(dictionary, & &1)
+
+    case Map.get(words, word) do
+      nil -> [{:error, "Unknown word '#{word}'"}]
+      tokens -> Evaluator.execute_tokens(tokens, stack, dictionary)
+    end
   end
 end

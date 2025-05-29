@@ -26,6 +26,10 @@ defmodule ForthEvaluator.EvaluatorTest do
     assert run_program(": half 2 SWAP / ; 8 half . 7 half .", context) == "4.0 3.5"
   end
 
+  test "program with definitions within definitions", context do
+    assert run_program(": by4 : by2 2 * ; by2 by2 ; 2 by4 .", context) == "8"
+  end
+
   test "raises runtime errors for unknown words", context do
     assert run_program("1 1 + . example_word 3 3 .", context) ==
              "2 RuntimeError: Unknown word 'example_word'"
